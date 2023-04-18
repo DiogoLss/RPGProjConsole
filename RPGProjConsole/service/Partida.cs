@@ -116,7 +116,7 @@ namespace RPGProjConsole.service
                     }
                     else if (value == 5)
                     {
-                        PericiaConfig.FazerTesteDePericiaContraMestre();
+                        PericiaConfig.FazerTesteDePericiaContraMestre(false, 0);
                     }
                     else if(value == 469){
                         IsPartidaOn = false;

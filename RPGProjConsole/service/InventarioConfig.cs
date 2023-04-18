@@ -207,17 +207,7 @@ namespace RPGProjConsole.service
                 }
                 else if (valor <= Personagem.Inventario.Dinheiro || edrop == 1)
                 {
-                    //var id = 0;
-                    //foreach(var item in Personagem.Inventario.InventarioArmas)
-                    //{
-                    //    if(arma.Id == item.Arma.Id)
-                    //    {
-                    //        id = item.Id;
-                    //    }
-                    //}
 
-                    //if(id == 0)
-                    //{
                         var inventarioArmas = new InventarioArma()
                         {
                             Arma = arma,
@@ -232,20 +222,6 @@ namespace RPGProjConsole.service
                         }                        
                         return _context.SaveChanges();
                         
-                    //}
-                    //else
-                    //{
-                    //    var arm = Personagem.Inventario.InventarioArmas.FirstOrDefault(x => x.Id == id);
-                    //    _context.Entry(arm).State = EntityState.Modified;
-                    //    _context.Update(arm);
-                    //    if (edrop == 0)
-                    //    {
-                    //        Personagem.Inventario.Dinheiro -= valor;
-                    //        _context.Entry(Personagem.Inventario).State = EntityState.Modified;
-                    //        _context.Update(Personagem.Inventario);
-                    //    }                          
-                    //    return _context.SaveChanges();
-                    //}
                 }
                 else
                 {
@@ -287,17 +263,6 @@ namespace RPGProjConsole.service
                 }
                 else if (valor <= Personagem.Inventario.Dinheiro || edrop == 1)
                 {
-                    //var id = 0;
-                    //foreach (var item in Personagem.Inventario.InventarioArmaduras)
-                    //{
-                    //    if (armadura.Id == item.Armadura.Id)
-                    //    {
-                    //        id = item.Id;
-                    //    }
-                    //}
-
-                    //if (id == 0)
-                    //{
                         var inventarioArmaduras = new InventarioArmadura()
                         {
                             Armadura = armadura,
@@ -311,22 +276,6 @@ namespace RPGProjConsole.service
                             _context.Update(Personagem.Inventario);
                         }                       
                         return _context.SaveChanges();
-
-                    //}
-                    //else
-                    //{
-                    //    var arm = Personagem.Inventario.InventarioArmaduras.FirstOrDefault(x => x.Id == id);
-                    //    arm.Qtd += qtd;
-                    //    _context.Entry(arm).State = EntityState.Modified;
-                    //    _context.Update(arm);
-                    //    if(edrop == 0)
-                    //    {
-                    //        Personagem.Inventario.Dinheiro -= valor;
-                    //        _context.Entry(Personagem.Inventario).State = EntityState.Modified;
-                    //        _context.Update(Personagem.Inventario);
-                    //    }                        
-                    //    return _context.SaveChanges();
-                    //}
                 }
                 else
                 {
@@ -506,8 +455,8 @@ namespace RPGProjConsole.service
                 }
                 else if (escolha == 1)//ITENS / LOJA / LOOT
                 {
-                    Console.WriteLine("1 - Deseja visualizar todos seus itens");
-                    Console.WriteLine("2 - Deseja comprar novos itens");
+                    Console.WriteLine("1 - Visualizar todos seus itens");
+                    Console.WriteLine("2 - Novos itens");
                     var x = Digitar();
                     if (x == 1)
                     {
@@ -696,13 +645,13 @@ namespace RPGProjConsole.service
         {            
             var isSaqueando = true;
 
-            while (isSaqueando)
-            {
-                Console.Clear();
-                Console.WriteLine("Você está saqueando o(a) {0}", Personagem.Nome);
+            //while (isSaqueando)
+            //{
+            //    Console.Clear();
+            //    Console.WriteLine("Você está saqueando o(a) {0}", Personagem.Nome);
 
 
-            }
+            //}
 
         }
         public void Atirar(Arma arma)
@@ -711,9 +660,9 @@ namespace RPGProjConsole.service
             if(armaInv != null)
             {
                 armaInv.MunicaoCarregada -= 1;
-            }
-            _context.Entry(armaInv).State = EntityState.Modified;
-            _context.Update(armaInv);
+                _context.Entry(armaInv).State = EntityState.Modified;
+                _context.Update(armaInv);
+            }            
             _context.SaveChanges();
         }
     }

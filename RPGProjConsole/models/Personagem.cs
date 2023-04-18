@@ -69,16 +69,21 @@ namespace RPGProjConsole.models
             {
                 result += Modifier(1);
             }
-            var alvoArmadura = 0;//agora soma a defesa do inimigo
+            var alvoArmadura = alvo.CA + alvo.Modifier(2);//agora soma a defesa do inimigo
             if(alvo.ArmaduraEquipada != null)
             {
-                alvoArmadura = alvo.ArmaduraEquipada.CA;
+                alvoArmadura += alvo.ArmaduraEquipada.CA;
+                //alvoArmadura 
             }
-            Console.WriteLine("soma ataq "+result+ " some def "+ alvoArmadura+alvo.CA);
-            if (result >= alvo.CA + alvoArmadura || DadoResult == 20)//testa para ve se acerta
+            Console.WriteLine("soma ataq "+result+ " some def "+ alvoArmadura);
+            if (result >= alvoArmadura || DadoResult == 20)//testa para ve se acerta
             {
                 Console.WriteLine("Rode um para causar dano");
                 var dano = CausarDano(dado,DadoResult);
+                if (EstaMirando)
+                {
+                    EstaMirando = false;
+                }
                 
                 Console.WriteLine("Você causou {0} de dano", dano);
                 alvo.Vitalidade -= dano;
@@ -89,6 +94,57 @@ namespace RPGProjConsole.models
             }
             Console.ReadLine();
             
+        }
+        public void AcertarComOportunidade(Personagem alvo)
+        {
+            Dado dado = new Dado();
+            Console.WriteLine("Rode 1d20");
+            var DadoResult = dado.RodarDado(Nome, 1, 20);
+            var result = DadoResult;//result é a soma do acerto
+            result += AtaqueBase;
+            if (ArmaEquipada != null)
+            {
+                if (ArmaEquipada.IsCorpoACorpo)
+                {
+                    result += Modifier(1);
+                }
+                else
+                {
+                    if (EstaMirando == true)
+                    {
+                        result += 10;
+                    }
+                    result += Modifier(2);
+                }
+            }
+            else
+            {
+                result += Modifier(1);
+            }
+            var alvoArmadura = alvo.CA;//agora soma a defesa do inimigo
+            if (alvo.ArmaduraEquipada != null)
+            {
+                alvoArmadura += alvo.ArmaduraEquipada.CA;
+            }
+            Console.WriteLine("soma ataq " + result + " some def " + alvoArmadura);
+            if (result >= alvoArmadura || DadoResult == 20)//testa para ve se acerta
+            {
+                Console.WriteLine("Rode um para causar dano");
+                var dano = CausarDano(dado, DadoResult);
+                if (EstaMirando)
+                {
+                    EstaMirando = false;
+                }
+
+                Console.WriteLine("Você causou {0} de dano", dano);
+                alvo.Vitalidade -= dano;
+            }
+            else//errou
+            {
+                Console.WriteLine("ih acertou nnn");
+            }
+            Console.ReadLine();
+
         }
         public int CausarDano(Dado dado, int dadoResult)
         {

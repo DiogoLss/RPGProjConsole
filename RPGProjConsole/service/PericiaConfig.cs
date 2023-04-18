@@ -35,7 +35,7 @@ namespace RPGProjConsole.service
         {
             return true;
         }
-        public bool FazerTesteDePericiaContraMestre()
+        public bool FazerTesteDePericiaContraMestre(bool isCombate, int idJogador)
         {
             var periciaTeste = true;
             while (periciaTeste)
@@ -55,10 +55,17 @@ namespace RPGProjConsole.service
                     return true;
                 }
                 var testeObj = testes[teste - 1];
-
+                var escolha = 0;
+                if (isCombate)
+                {
+                    escolha = 2;
+                }
+                else
+                {
+                    Console.WriteLine("Todos farão o teste de {0}? 1 - sim 2 - não", testeObj.Descricao);
+                    escolha = DigitarValor();
+                }
                 
-                Console.WriteLine("Todos farão o teste de {0}? 1 - sim 2 - não", testeObj.Descricao);
-                var escolha = DigitarValor();
                 if (escolha == 0)
                 {
                     Console.WriteLine("Não entendi");
@@ -66,8 +73,6 @@ namespace RPGProjConsole.service
                 else if(escolha == 1)
                 {
                     var result = Dados.RodarDado("Mestre",1,20);
-                    Console.WriteLine("Quantos de desempate?");
-                    var desempate = DigitarValor();
                     var falhos = 0;
                     foreach(var item in _partida.Jogadores)
                     {
@@ -79,23 +84,30 @@ namespace RPGProjConsole.service
                             x.Pericia.Id == testeObj.Id);
 
 
-                        falhos += TestarPericia(item,result, desempate, periciaN);
+                        falhos += TestarPericia(item,result, testeObj, periciaN);
                     }
                     Console.WriteLine("{0} pessoas falharam", falhos);
                 }
                 else if (escolha == 2)
                 {
-                    Console.WriteLine("Teste de perícia de quem?");
-                    for (int i = 0; i < _partida.Jogadores.Count; i++)
+                    Jogador jogador = null;
+                    if (isCombate)
                     {
-                        Console.WriteLine("{0} - {1}", i + 1, _partida.Jogadores[i].Nome);
+                        jogador = _partida.Jogadores.Find(x => x.Id == idJogador);
                     }
-                    var jogadorIndex = DigitarValor();
-                    var jogador = _partida.Jogadores[jogadorIndex - 1];
+                    else
+                    {
+                        Console.WriteLine("Teste de perícia de quem?");
+                        for (int i = 0; i < _partida.Jogadores.Count; i++)
+                        {
+                            Console.WriteLine("{0} - {1}", i + 1, _partida.Jogadores[i].Nome);
+                        }
+                        var jogadorIndex = DigitarValor();
+                        jogador = _partida.Jogadores[jogadorIndex - 1];
+                    }
+                    
 
                     var result = Dados.RodarDado("Mestre", 1, 20);
-                    Console.WriteLine("Quantos de desempate?");
-                    var desempate = DigitarValor();
                     var falhos = 0;
                     var periciaN = _context.JogadorPericia
                            .Include(x => x.Pericia)
@@ -103,34 +115,47 @@ namespace RPGProjConsole.service
                            x => x.Jogador.Id == jogador.Id
                            &&
                            x.Pericia.Id == testeObj.Id);
-                    falhos += TestarPericia(jogador, result, desempate, periciaN);
+                    falhos += TestarPericia(jogador, result, testeObj, periciaN);
                     Console.WriteLine("{0} pessoas falharam", falhos);
+                    Console.ReadLine();
                 }
             }
             
             return true;
         }
-        public int TestarPericia(Jogador jogador, int result, int addMestre, JogadorPericia pericia)
+        public int TestarPericia(Jogador jogador, int result, Pericia periciaObj, JogadorPericia pericia)
         {
             var testandoPericia = true;
 
             while (testandoPericia)
             {
+                if(periciaObj.SemTreinamento && pericia == null)
+                {
+                    Console.WriteLine("O jogador {0} falhou no teste porque não tem treinamento.",jogador.Nome);
+                    Console.ReadLine();
+                    return 1;
+                }
                 var dadoJogador = Dados.RodarDado(jogador.Nome, 1, 20);
 
                 if(dadoJogador == 20)
                 {
                     Console.WriteLine("Jogador {0} passou no teste com 20 no dado");
-                    Console.ReadLine();
                     testandoPericia = false;
+                    Console.ReadLine();
                     return 0;
                 }
                 if(pericia != null)
                 {
                     dadoJogador += pericia.Quantidade;
                 }
-                
-                if (dadoJogador > result)
+                var jogadorHabilidade = jogador.Modifier(periciaObj.IndexHabilidade);
+                dadoJogador += jogadorHabilidade;
+                if (jogador.ArmaduraEquipada != null)
+                {
+                    dadoJogador -= jogador.ArmaduraEquipada.PenalidadeDeDestreza;
+                }
+
+                if (dadoJogador >= result)
                 {
                     if (pericia != null)
                     {
@@ -147,7 +172,7 @@ namespace RPGProjConsole.service
                     else
                     {
                         Console.WriteLine(
-                        "Jogador {0} passou no teste com {1}",
+                        "Jogador {0} passou no teste com {1} sem pontos na perícia",
                         jogador.Nome,
                         result
                         );
@@ -170,61 +195,26 @@ namespace RPGProjConsole.service
                         pericia.Pericia.Descricao,
                         result
                         );
-                        Console.ReadLine();
-                        testandoPericia = false;
-                        return 1;
+                        
                     }
                     else
                     {
                         Console.WriteLine(
-                        "Jogador {0} falhou no teste com {1}",
+                        "Jogador {0} falhou no teste com {1}, sem pontos na perícia",
                         jogador.Nome,
                         result
-                        );
-                        testandoPericia = false;
-                        return 0;
+                        );               
                     }
+                    Console.ReadLine();
+                    testandoPericia = false;
+                    return 1;
                 }
                 else
                 {
-                    if (pericia != null)
-                    {
-                        var jogadorPericia = jogador.Modifier(pericia.Pericia.IndexHabilidade);
-                        if (jogadorPericia > addMestre)
-                        {
-                            Console.WriteLine(
-                            "Jogador {0} passou no teste com {1} no dado, {2} de perícia na " +
-                            "habilidade {3} contra o mestre no seu total de {4}",
-                            jogador.Nome,
-                            dadoJogador - pericia.Quantidade,
-                            pericia.Quantidade,
-                            pericia.Pericia.Descricao,
-                            result
-                            );
-                            Console.ReadLine();
-                            testandoPericia = false;
-                            return 0;
-                        }
-                        else if (jogadorPericia < addMestre)
-                        {
-                            Console.WriteLine(
-                            "Jogador {0} falhou no teste com {1} no dado, {2} de perícia na " +
-                            "habilidade {3} contra o mestre no seu total de {4}",
-                            jogador.Nome,
-                            dadoJogador - pericia.Quantidade,
-                            pericia.Quantidade,
-                            pericia.Pericia.Descricao,
-                            result
-                            );
-                            Console.ReadLine();
-                            testandoPericia = false;
-                            return 1;
-                        }
-                    }
+                    return 0;
                 }
             }
-            return 0;
-            
+            return 0;        
         }
     }
 }

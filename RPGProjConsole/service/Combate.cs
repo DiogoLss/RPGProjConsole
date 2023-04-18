@@ -52,13 +52,19 @@ namespace RPGProjConsole.service
                 {
                     Nome = "corredor1",
                     Destreza = 12,
-                    Vitalidade = 10
-                };
+                    Vitalidade = 10,
+                    CA = 12,
+                    IsNpc = true,
+                    IsMob = true
+            };
                 var mob2 = new Npcs
                 {
                     Nome = "corredor2",
                     Destreza = 12,
-                    Vitalidade = 10
+                    Vitalidade = 10,
+                    CA = 12,
+                    IsNpc = true,
+                    IsMob = true
                 };
                 Combatentes.Add(mob1);
                 Combatentes.Add(mob2);
@@ -72,23 +78,19 @@ namespace RPGProjConsole.service
             var value = Partida.DigitarValor();
             if(value == 1)
             {
-                ControleDeRodadas();
-                //IniciarComOportunidade();
+                IniciarComOportunidade(EscolherCombatente());
             }
             else if(value == 2)
             {
                 DefinirIniciativa();
             }
-            else
-            {
-                Console.WriteLine("Não entendi deseja finalizar combate?");
-                //ADICIONAR ESCOLHA
-            }
             Console.Clear();
+            Partida._context.SaveChanges();
         }
         public void DefinirIniciativa()
         {
             Console.Clear();
+            Console.WriteLine("Rode suas iniciativas:");
             Random randNum = new Random();
             //var unordered = Combatentes;
             for (int i = 0; i < Combatentes.Count; i++)//TODOS JOGAM SUAS INICIATIVAS
@@ -107,11 +109,12 @@ namespace RPGProjConsole.service
                     DesempateIniciativa(i);//DESEMPATA
                 }
             }
-
+            Console.WriteLine("Aqui está a ordem de jogadas, enter para continuar");
             for (int i = 1; i <= Combatentes.Count; i++)//MOSTRA ORDEM DE JOGADA
             {
-                Console.WriteLine("Aqui está a ordem de jogadas, enter para continuar");
-                Console.WriteLine(i + " " + Combatentes[i - 1].Nome + " " + Combatentes[i - 1].Iniciativa);
+                
+                Console.WriteLine("{0} - nome: {1} com {2} de iniciativa",
+                    i, Combatentes[i - 1].Nome,Combatentes[i - 1].Iniciativa);
             }
             Console.ReadLine();
             Console.Clear();
@@ -167,6 +170,10 @@ namespace RPGProjConsole.service
                     }
                     Console.WriteLine();
                     Turn(Combatentes[i]);
+                    if(IsCombateOn == false)
+                    {
+                        return;
+                    }
                 }
                 Console.Clear();
                 rodada++;
@@ -185,7 +192,7 @@ namespace RPGProjConsole.service
                 if (opc == 1)
                 {
                     Console.Clear();
-                    var alvo = OpcoesDeAlvo(personagemRodada);
+                    var alvo = EscolherCombatente();
                     if (alvo.Id != 469)
                     {
                         personagemRodada.Acertar(alvo);
@@ -206,20 +213,65 @@ namespace RPGProjConsole.service
                 }
                 else if (opc == 2)
                 {
-                    personagemRodada.InventarioObj.RecarregarArma();
-                    estaNaVez = false;
+                    if (personagemRodada.ArmaEquipada != null && !personagemRodada.ArmaEquipada.IsCorpoACorpo)
+                    {
+                        personagemRodada.InventarioObj.RecarregarArma();
+                        estaNaVez = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Está desarmado ou sua arma é corpo a corpo");
+                        Console.ReadLine();
+                    }
+                    
                 }
                 else if (opc == 3)
                 {
                     personagemRodada.EstaMirando = true;
                     estaNaVez = false;
                 }
+                else if(opc == 4)
+                {
+
+                }
+                else if(opc == 5)
+                {
+                    Partida.PericiaConfig.FazerTesteDePericiaContraMestre(true, personagemRodada.Id);
+                }
+                else if(opc == 6)
+                {
+                    Console.WriteLine("{0} passou ou perdeu a vez");
+                    estaNaVez = false;
+                }
+                else if(opc == 7)
+                {
+                    IsCombateOn = false;
+                    estaNaVez = false;
+                }
             }
             
             Console.Clear();
         }
-        public void IniciarComOportunidade()
+        public void IniciarComOportunidade(Personagem personagemRodada)
         {
+            Console.WriteLine("{0} está atacando com oportunidade", personagemRodada.Nome);
+            var alvo = EscolherCombatente();
+            if (alvo.Id != 469)
+            {
+                personagemRodada.AcertarComOportunidade(alvo);
+                if (!personagemRodada.IsNpc)
+                {
+                    Partida._context.Entry(personagemRodada).State = EntityState.Modified;
+                    Partida._context.Update(personagemRodada);
+                }
+                else if (!alvo.IsNpc)
+                {
+                    Partida._context.Entry(alvo).State = EntityState.Modified;
+                    Partida._context.Update(alvo);
+                }
+
+                Partida._context.SaveChanges();
+            }
             DefinirIniciativa();//No fim do ataque
         }
         public void OpcoesCombateConsole()
@@ -227,11 +279,12 @@ namespace RPGProjConsole.service
             Console.WriteLine("1 - Atacar");
             Console.WriteLine("2 - Recarregar arma");
             Console.WriteLine("3 - Mirar");
-            Console.WriteLine("4 - ");
+            Console.WriteLine("4 - Trocar de arma");
             Console.WriteLine("5 - teste de perícia");
-            Console.WriteLine("6 - Tudo que não seja controlado por aqui(correr, etc.)");
+            Console.WriteLine("6 - Pular vez");
+            Console.WriteLine("7 - Finalizar combate");
         }
-        public Personagem OpcoesDeAlvo(Personagem personagemRodada)
+        public Personagem EscolherCombatente()
         {
             Console.WriteLine("Quem?");
             for (int i = 1; i <= Combatentes.Count; i++)
