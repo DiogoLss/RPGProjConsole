@@ -26,6 +26,7 @@ namespace RPGProjConsole.models
         public int Inteligencia { get; set; }
         public int Sabedoria { get; set; }
         public int Carisma { get; set; }
+        public int PericiaMaxima { get; set; }
         public int MunicaoArmaEquipada { get; set; }
         public Arma ArmaEquipada { get; set; }
         public Armadura ArmaduraEquipada { get; set; }
@@ -40,6 +41,10 @@ namespace RPGProjConsole.models
         public bool IsNpc { get; set; }
         [NotMapped]
         public bool EstaMirando{ get; set; }
+        [NotMapped]
+        public bool ParticipouDoCombate { get; set; }
+        [NotMapped]
+        public bool EstaMortoOuInconciente { get; set; } = false;
         //[NotMapped]
         //public bool IsMobIdentifier { get; set; }
 

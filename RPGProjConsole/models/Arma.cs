@@ -16,6 +16,9 @@ namespace RPGProjConsole.models
         public bool IsCorpoACorpo { get; set; }
         public int Durabilidade { get; set; }
         public int MunicaoMaxima { get; set; }
+        public bool DamageOverTime { get; set; }
+        public int DadosDOT { get; set; }
+        public int ValorDadoDOT { get; set; }
 
     }
 }

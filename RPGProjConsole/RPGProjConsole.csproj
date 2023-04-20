@@ -191,9 +191,14 @@
     <Compile Include="Migrations\20230416015623_ST.designer.cs">
       <DependentUpon>20230416015623_ST.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20230420144520_arvores.cs" />
+    <Compile Include="Migrations\20230420144520_arvores.designer.cs">
+      <DependentUpon>20230420144520_arvores.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\RPGContextModelSnapshot.cs" />
     <Compile Include="models\Arma.cs" />
     <Compile Include="models\Armadura.cs" />
+    <Compile Include="models\ArvoreDeHabilidades.cs" />
     <Compile Include="models\Inventario.cs" />
     <Compile Include="models\InventarioArma.cs" />
     <Compile Include="models\InventarioArmadura.cs" />
@@ -201,6 +206,7 @@
     <Compile Include="models\Item.cs" />
     <Compile Include="models\ItemGeneral.cs" />
     <Compile Include="models\Jogador.cs" />
+    <Compile Include="models\JogadorArvore.cs" />
     <Compile Include="models\JogadorPericia.cs" />
     <Compile Include="models\NPCs.cs" />
     <Compile Include="models\Pericia.cs" />
@@ -211,6 +217,7 @@
     <Compile Include="service\Dado.cs" />
     <Compile Include="service\InventarioConfig.cs" />
     <Compile Include="service\ItemConfig.cs" />
+    <Compile Include="service\Nivel.cs" />
     <Compile Include="service\Partida.cs" />
     <Compile Include="service\PericiaConfig.cs" />
   </ItemGroup>

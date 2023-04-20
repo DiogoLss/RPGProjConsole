@@ -8,7 +8,8 @@ namespace RPGProjConsole.context
         //public RPGContext(DbContextOptions<RPGContext> options):base(options)
         //{
         //}
-        string connectionLocal = "Data Source=desktop-hd4srfb\\sqlexpress;Initial Catalog=RPGDB;Integrated Security=True";
+        string connectionLocal = "Data Source=f326\\sqlexpress;Initial Catalog=RPGDB;Integrated Security=True";
+
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
             builder.UseSqlServer(connectionLocal);
@@ -28,6 +29,8 @@ namespace RPGProjConsole.context
         public DbSet<InventarioItem> InventarioItems { get; set; }
         public DbSet<Pericia> Pericias { get; set; }
         public DbSet<JogadorPericia> JogadorPericia { get; set; }
+        public DbSet<ArvoreDeHabilidades> ArvoreHabilidades { get; set; }
+        public DbSet<JogadorArvore> JogadorArvores { get; set; }
 
     }
 }

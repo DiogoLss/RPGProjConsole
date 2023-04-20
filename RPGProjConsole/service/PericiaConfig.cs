@@ -55,70 +55,121 @@ namespace RPGProjConsole.service
                     return true;
                 }
                 var testeObj = testes[teste - 1];
-                var escolha = 0;
-                if (isCombate)
+                if(testeObj.Id == 1)//COLOCAR ID CORRESPONDENTE A CURA NO DB
                 {
-                    escolha = 2;
-                }
-                else
-                {
-                    Console.WriteLine("Todos farão o teste de {0}? 1 - sim 2 - não", testeObj.Descricao);
-                    escolha = DigitarValor();
-                }
-                
-                if (escolha == 0)
-                {
-                    Console.WriteLine("Não entendi");
-                }
-                else if(escolha == 1)
-                {
-                    var result = Dados.RodarDado("Mestre",1,20);
-                    var falhos = 0;
-                    foreach(var item in _partida.Jogadores)
-                    {
-                        var periciaN = _context.JogadorPericia
-                            .Include(x => x.Pericia)
-                            .FirstOrDefault(
-                            x => x.Jogador.Id == item.Id
-                            &&
-                            x.Pericia.Id == testeObj.Id);
-
-
-                        falhos += TestarPericia(item,result, testeObj, periciaN);
-                    }
-                    Console.WriteLine("{0} pessoas falharam", falhos);
-                }
-                else if (escolha == 2)
-                {
-                    Jogador jogador = null;
+                    var jogador = new Jogador();
+                    var periciaN = new JogadorPericia();
                     if (isCombate)
                     {
                         jogador = _partida.Jogadores.Find(x => x.Id == idJogador);
+                        periciaN = _context.JogadorPericia
+                           .Include(x => x.Pericia)
+                           .FirstOrDefault(
+                           x => x.Jogador.Id == jogador.Id
+                           &&
+                           x.Pericia.Id == testeObj.Id);
                     }
                     else
                     {
-                        Console.WriteLine("Teste de perícia de quem?");
                         for (int i = 0; i < _partida.Jogadores.Count; i++)
                         {
                             Console.WriteLine("{0} - {1}", i + 1, _partida.Jogadores[i].Nome);
                         }
                         var jogadorIndex = DigitarValor();
                         jogador = _partida.Jogadores[jogadorIndex - 1];
-                    }
-                    
-
-                    var result = Dados.RodarDado("Mestre", 1, 20);
-                    var falhos = 0;
-                    var periciaN = _context.JogadorPericia
+                        var result = Dados.RodarDado("Mestre", 1, 20);
+                        periciaN = _context.JogadorPericia
                            .Include(x => x.Pericia)
                            .FirstOrDefault(
                            x => x.Jogador.Id == jogador.Id
                            &&
-                           x.Pericia.Id == testeObj.Id);
-                    falhos += TestarPericia(jogador, result, testeObj, periciaN);
-                    Console.WriteLine("{0} pessoas falharam", falhos);
-                    Console.ReadLine();
+                           x.Pericia.Id == testeObj.Id); 
+                    }
+                    Console.WriteLine("Quem você deseja curar?");
+                    for (int i = 0; i < _partida.Jogadores.Count; i++)
+                    {
+                        Console.WriteLine("{0} - {1} com {2} de HP",
+                            i + 1,
+                            _partida.Jogadores[i].Nome,
+                            _partida.Jogadores[i].Vitalidade
+                            );
+                    }
+                    if(periciaN == null)
+                    {
+                        Console.WriteLine("Você não pode usar cura");
+                        
+                    }
+                    Curar(_partida.Jogadores[DigitarValor() - 1], periciaN);
                 }
+                else
+                {
+                    var escolha = 0;
+                    if (isCombate)
+                    {
+                        escolha = 2;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Todos farão o teste de {0}? 1 - sim 2 - não", testeObj.Descricao);
+                        escolha = DigitarValor();
+                    }
+
+                    if (escolha == 0)
+                    {
+                        Console.WriteLine("Não entendi");
+                    }
+                    else if (escolha == 1)
+                    {
+                        var result = Dados.RodarDado("Mestre", 1, 20);
+                        var falhos = 0;
+                        foreach (var item in _partida.Jogadores)
+                        {
+                            var periciaN = _context.JogadorPericia
+                                .Include(x => x.Pericia)
+                                .FirstOrDefault(
+                                x => x.Jogador.Id == item.Id
+                                &&
+                                x.Pericia.Id == testeObj.Id);
+
+
+                            falhos += TestarPericia(item, result, testeObj, periciaN);
+                        }
+                        Console.WriteLine("{0} pessoas falharam", falhos);
+                        Console.ReadLine();
+                    }
+                    else if (escolha == 2)
+                    {
+                        Jogador jogador = null;
+                        if (isCombate)
+                        {
+                            jogador = _partida.Jogadores.Find(x => x.Id == idJogador);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Teste de perícia de quem?");
+                            for (int i = 0; i < _partida.Jogadores.Count; i++)
+                            {
+                                Console.WriteLine("{0} - {1}", i + 1, _partida.Jogadores[i].Nome);
+                            }
+                            var jogadorIndex = DigitarValor();
+                            jogador = _partida.Jogadores[jogadorIndex - 1];
+                        }
+
+
+                        var result = Dados.RodarDado("Mestre", 1, 20);
+                        var falhos = 0;
+                        var periciaN = _context.JogadorPericia
+                               .Include(x => x.Pericia)
+                               .FirstOrDefault(
+                               x => x.Jogador.Id == jogador.Id
+                               &&
+                               x.Pericia.Id == testeObj.Id);
+                        falhos += TestarPericia(jogador, result, testeObj, periciaN);
+                        Console.WriteLine("{0} pessoas falharam", falhos);
+                        Console.ReadLine();
+                    }
+                }
+                
             }
             
             return true;
@@ -215,6 +266,10 @@ namespace RPGProjConsole.service
                 }
             }
             return 0;        
+        }
+        public void Curar(Personagem alvo, JogadorPericia pericia)
+        {
+
         }
     }
 }

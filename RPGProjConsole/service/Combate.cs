@@ -24,6 +24,7 @@ namespace RPGProjConsole.service
                 foreach (var item in partida.Jogadores)
                 {
                     item.IsNpc = false;
+                    item.ParticipouDoCombate = false;
                     //item.IsMobIdentifier = false;
                     Combatentes.Add(item);
                 }
@@ -152,7 +153,18 @@ namespace RPGProjConsole.service
                     Console.WriteLine();
                     for (int j = 0; j < Combatentes.Count; j++)//MOSTRA STTS COMBATENTES
                     {
-                        if(i == j)
+                        if (Combatentes[j].EstaMortoOuInconciente)
+                        {
+                            var x = Console.BackgroundColor;
+                            var y = Console.ForegroundColor;
+                            Console.BackgroundColor = ConsoleColor.Red;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.WriteLine("{0} está morto ou inconciente", Combatentes[i].Nome);
+                            ShowStatus(Combatentes[j]);
+                            Console.BackgroundColor = x;
+                            Console.ForegroundColor = y;
+                        }
+                        else if(i == j)
                         {
                             var x = Console.BackgroundColor;
                             var y = Console.ForegroundColor;
@@ -169,13 +181,23 @@ namespace RPGProjConsole.service
                         }               
                     }
                     Console.WriteLine();
-                    Turn(Combatentes[i]);
-                    if(IsCombateOn == false)
+                    if (Combatentes[i].EstaMortoOuInconciente)
+                    {
+                        Console.WriteLine("{0} esta morto ou inconciente, precisa ter pelo menos 1 de vida para jogar"
+                            , Combatentes[i].Nome);
+                    }
+                    else
+                    {
+                        Turn(Combatentes[i]);
+                    }
+                    
+                    Console.Clear();
+                    if (IsCombateOn == false)
                     {
                         return;
                     }
                 }
-                Console.Clear();
+                
                 rodada++;
             }        
         }
@@ -196,6 +218,11 @@ namespace RPGProjConsole.service
                     if (alvo.Id != 469)
                     {
                         personagemRodada.Acertar(alvo);
+                        if (!personagemRodada.ParticipouDoCombate)
+                        {
+                            personagemRodada.ParticipouDoCombate = true;
+                        }
+                        TestarSeMorreuEDarExp(alvo);
                         estaNaVez = false;
                         if (!personagemRodada.IsNpc)
                         {
@@ -235,8 +262,28 @@ namespace RPGProjConsole.service
 
                 }
                 else if(opc == 5)
-                {
-                    Partida.PericiaConfig.FazerTesteDePericiaContraMestre(true, personagemRodada.Id);
+                { 
+                    Console.WriteLine("1 - Perícia contra o mestre");
+                    Console.WriteLine("2 - Teste de medo");
+                    var escolha = Partida.DigitarValor();
+                    if(escolha == 0)
+                    {
+                        Console.WriteLine("Não entendi");
+                    }
+                    else if(escolha == 1)
+                    {
+                        Partida.PericiaConfig.FazerTesteDePericiaContraMestre(true, personagemRodada.Id);
+                        if (!personagemRodada.ParticipouDoCombate)
+                        {
+                            personagemRodada.ParticipouDoCombate = true;
+                        }
+                        estaNaVez = false;
+                    }
+                    else if (escolha == 2)
+                    {
+                        //Partida.PericiaConfig
+                    }
+                    
                 }
                 else if(opc == 6)
                 {
@@ -248,6 +295,7 @@ namespace RPGProjConsole.service
                     IsCombateOn = false;
                     estaNaVez = false;
                 }
+                Console.ReadLine();
             }
             
             Console.Clear();
@@ -259,6 +307,11 @@ namespace RPGProjConsole.service
             if (alvo.Id != 469)
             {
                 personagemRodada.AcertarComOportunidade(alvo);
+                if (!personagemRodada.ParticipouDoCombate)
+                {
+                    personagemRodada.ParticipouDoCombate = true;
+                }
+                TestarSeMorreuEDarExp(alvo);
                 if (!personagemRodada.IsNpc)
                 {
                     Partida._context.Entry(personagemRodada).State = EntityState.Modified;
@@ -273,6 +326,36 @@ namespace RPGProjConsole.service
                 Partida._context.SaveChanges();
             }
             DefinirIniciativa();//No fim do ataque
+        }
+        public void TestarSeMorreuEDarExp(Personagem alvo)
+        {
+            if (alvo.Vitalidade <= 0)
+            {
+                Console.WriteLine("Alvo com {0} de vida", alvo.Vitalidade);
+                alvo.EstaMortoOuInconciente = true;
+                if (alvo.IsNpc)
+                {
+                    var divisao = 1;
+                    for (int i = 0; i < Combatentes.Count; i++)
+                    {
+                        if (Combatentes[i].ParticipouDoCombate)
+                        {
+                            divisao++;
+                        }
+                    }
+                    for (int i = 0; i < Combatentes.Count; i++)
+                    {
+                        if (Combatentes[i].ParticipouDoCombate)
+                        {
+                            var jogador = Combatentes[i];
+                            jogador.Exp += alvo.Exp / divisao;
+                            Partida._context.Entry(jogador).State = EntityState.Modified;
+                            Partida._context.Update(jogador);
+                        }
+                    }
+                    Partida._context.SaveChanges();
+                }
+            }
         }
         public void OpcoesCombateConsole()
         {
