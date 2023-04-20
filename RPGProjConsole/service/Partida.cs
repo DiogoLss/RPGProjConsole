@@ -14,6 +14,7 @@ namespace RPGProjConsole.service
         public readonly RPGContext _context;
         public PericiaConfig PericiaConfig { get; set; }
         public bool IsPartidaOn { get; set; }
+        private static Random rng = new Random();
         public List<Jogador> Jogadores { get; set; }
         public List<Npcs> Npcs { get; set; }
         public List<Npcs> Mobs { get; set; }
@@ -26,10 +27,12 @@ namespace RPGProjConsole.service
                 .Include(j => j.ArmaduraEquipada)
                 .ToList();
             IsPartidaOn = true;
-            for(int i = 0; i < Jogadores.Count; i++)
+            Jogadores.Add( new Jogador { Nome = "Diogo" });
+            Jogadores.Add(new Jogador { Nome = "Roberto"});
+            for (int i = 0; i < Jogadores.Count; i++)
             {
                 Jogadores[i].IsNpc = false;
-                Jogadores[i].InventarioObj = new InventarioConfig(Jogadores[i],_context);
+                Jogadores[i].InventarioObj = new InventarioConfig(Jogadores[i], _context);
             }
             PericiaConfig = new PericiaConfig(_context, this);
         }
@@ -44,7 +47,7 @@ namespace RPGProjConsole.service
                 Console.WriteLine("3 - Adicionar mob à partida");
                 Console.WriteLine("4 - Abrir inventário");
                 Console.WriteLine("5 - Perícia");
-                Console.WriteLine("");
+                Console.WriteLine("6 - Testar level up");
                 Console.WriteLine("Finalizar partida: 469");
                 Console.WriteLine();
 
@@ -117,6 +120,26 @@ namespace RPGProjConsole.service
                     else if (value == 5)
                     {
                         PericiaConfig.FazerTesteDePericiaContraMestre(false, 0);
+                    }
+                    else if(value == 6)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Testaremos se alguém upou de nível");
+                        int n = Jogadores.Count;
+                        while (n > 1)
+                        {
+                            n--;
+                            int k = rng.Next(n + 1);
+                            var obj = Jogadores[k];
+                            Jogadores[k] = Jogadores[n];
+                            Jogadores[n] = obj;
+                        }
+                        for (int i = 0; i < Jogadores.Count; i++)
+                        {
+                            var nivel = new Nivel(Jogadores[i]);
+                            nivel.TentarAumentarNivel();
+                        }
+                        Console.ReadLine();
                     }
                     else if(value == 469){
                         IsPartidaOn = false;

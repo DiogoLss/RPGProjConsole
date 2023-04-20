@@ -53,19 +53,22 @@ namespace RPGProjConsole.service
                 {
                     Nome = "corredor1",
                     Destreza = 12,
-                    Vitalidade = 10,
-                    CA = 12,
+                    Vitalidade = 2,
+                    CA = 0,
                     IsNpc = true,
-                    IsMob = true
+                    IsMob = true,
+                    Exp = 2000
+                
             };
                 var mob2 = new Npcs
                 {
                     Nome = "corredor2",
                     Destreza = 12,
-                    Vitalidade = 10,
-                    CA = 12,
+                    Vitalidade = 2,
+                    CA = 0,
                     IsNpc = true,
-                    IsMob = true
+                    IsMob = true,
+                    Exp = 2000
                 };
                 Combatentes.Add(mob1);
                 Combatentes.Add(mob2);
@@ -217,7 +220,16 @@ namespace RPGProjConsole.service
                     var alvo = EscolherCombatente();
                     if (alvo.Id != 469)
                     {
-                        personagemRodada.Acertar(alvo);
+                        if(personagemRodada.MunicaoArmaEquipada <= 0 && !personagemRodada.ArmaEquipada.IsCorpoACorpo)
+                        {
+                            Console.WriteLine("Sem munição");
+                            personagemRodada.MunicaoArmaEquipada = 0;
+                        }
+                        else
+                        {
+                            personagemRodada.Acertar(alvo);
+                        }
+                        
                         if (!personagemRodada.ParticipouDoCombate)
                         {
                             personagemRodada.ParticipouDoCombate = true;
@@ -335,18 +347,19 @@ namespace RPGProjConsole.service
                 alvo.EstaMortoOuInconciente = true;
                 if (alvo.IsNpc)
                 {
-                    var divisao = 1;
+                    var divisao = 0;
                     for (int i = 0; i < Combatentes.Count; i++)
                     {
-                        if (Combatentes[i].ParticipouDoCombate)
+                        if (Combatentes[i].ParticipouDoCombate && !Combatentes[i].IsNpc)
                         {
                             divisao++;
                         }
                     }
                     for (int i = 0; i < Combatentes.Count; i++)
                     {
-                        if (Combatentes[i].ParticipouDoCombate)
+                        if (Combatentes[i].ParticipouDoCombate && !Combatentes[i].IsNpc)
                         {
+                            if (divisao == 0) divisao = 1;
                             var jogador = Combatentes[i];
                             jogador.Exp += alvo.Exp / divisao;
                             Partida._context.Entry(jogador).State = EntityState.Modified;
@@ -388,7 +401,10 @@ namespace RPGProjConsole.service
             else if (alvo == 0 || alvo > Combatentes.Count)
             {
                 Console.WriteLine("Não entendi");
-                return new Personagem();
+                return new Personagem
+                {
+                    Id = 469
+                };
             }
             else
             {

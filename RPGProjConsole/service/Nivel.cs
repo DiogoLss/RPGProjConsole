@@ -149,6 +149,7 @@ namespace RPGProjConsole.service
             {
                 Console.WriteLine("{0} upou para o nível {1}!",
                     Personagem.Nome, Personagem.Nivel);
+                Console.ReadLine();
             }
         }
 

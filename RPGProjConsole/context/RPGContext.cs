@@ -10,13 +10,10 @@ namespace RPGProjConsole.context
         //}
         string connectionLocal = "Data Source=f326\\sqlexpress;Initial Catalog=RPGDB;Integrated Security=True";
 
+
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
             builder.UseSqlServer(connectionLocal);
-            //using(var results = new DbManagerContext())
-            //builder.UseMySQL(connection);
-            //builder.UseMySql(connectionAWS
-            //, new MySqlServerVersion(new Version(8, 0, 31)));DESKTOP-HD4SRFB\SQLEXPRESS
         }
         public DbSet<Jogador> Jogadores { get; set; }
         public DbSet<Npcs> Npcs { get; set; }
