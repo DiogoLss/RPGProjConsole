@@ -34,7 +34,9 @@ namespace RPGProjConsole.models
         [NotMapped]
         public InventarioConfig InventarioObj { get; set; }
         [NotMapped]
-        public JogadorPericia Pericia { get; set; }
+        public ArvoreSkills ArvoreSkills { get; set; }
+        //[NotMapped]
+        //public JogadorPericia Pericia { get; set; }
         [NotMapped]
         public int Iniciativa { get; set; }
         [NotMapped]
@@ -55,6 +57,11 @@ namespace RPGProjConsole.models
             var DadoResult = dado.RodarDado(Nome, 1, 20);
             var result = DadoResult;//result é a soma do acerto
             result += AtaqueBase;
+            if(ArvoreSkills.InimigoPredileto() == alvo.Id)
+            {
+                result += ArvoreSkills.InimigoPredileto();
+            }
+            
             if (ArmaEquipada != null)
             {
                 if (ArmaEquipada.IsCorpoACorpo)

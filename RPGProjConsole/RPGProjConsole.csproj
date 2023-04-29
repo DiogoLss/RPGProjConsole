@@ -195,6 +195,10 @@
     <Compile Include="Migrations\20230420144520_arvores.designer.cs">
       <DependentUpon>20230420144520_arvores.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20230427172457_arvoreAdded.cs" />
+    <Compile Include="Migrations\20230427172457_arvoreAdded.designer.cs">
+      <DependentUpon>20230427172457_arvoreAdded.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\RPGContextModelSnapshot.cs" />
     <Compile Include="models\Arma.cs" />
     <Compile Include="models\Armadura.cs" />
@@ -213,6 +217,7 @@
     <Compile Include="models\Personagem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="service\ArvoreSkills.cs" />
     <Compile Include="service\Combate.cs" />
     <Compile Include="service\Dado.cs" />
     <Compile Include="service\InventarioConfig.cs" />

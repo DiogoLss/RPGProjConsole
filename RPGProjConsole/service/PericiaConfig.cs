@@ -2,6 +2,7 @@
 using RPGProjConsole.context;
 using RPGProjConsole.models;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 
@@ -103,8 +104,31 @@ namespace RPGProjConsole.service
                                 _partida.Jogadores[i].Vitalidade
                                 );
                         }
-
-                        Curar(_partida.Jogadores[DigitarValor() - 1], periciaN, result, jogador);
+                        var jogadorCura = _partida.Jogadores[DigitarValor() - 1];
+                        Console.WriteLine("Que Item de cura deseja usar? 0 para não usar");
+                        var itens = _context.Items.ToList();
+                        for (int i = 0; i < itens.Count; i++)
+                        {
+                            if (itens[i].ECura)
+                            {
+                                Console.WriteLine("{0} - {1} cura {2}d4 de HP",
+                                i + 1,
+                                itens[i].Nome,
+                                itens[i].QtdDadosCura
+                                );
+                            }
+                        }
+                        var indexItem = DigitarValor() - 1;
+                        var item = itens[indexItem];
+                        if(indexItem == 0)
+                        {
+                            Curar(jogadorCura, periciaN, result, jogador, null);
+                        }
+                        else
+                        {
+                            Curar(jogadorCura, periciaN, result, jogador, item);
+                        }
+                        
                     }              
                 }
                 else
@@ -273,17 +297,27 @@ namespace RPGProjConsole.service
             }
             return 0;        
         }
-        public void Curar(Personagem alvo, JogadorPericia pericia, int result, Personagem jogadorTeste)
+        public void Curar(Personagem alvo, JogadorPericia pericia, int result, Personagem jogadorTeste, ItemGeneral item)
         {
             var teste = jogadorTeste.Modifier(5) + pericia.Quantidade;
             teste += Dados.RodarDado(jogadorTeste.Nome,1,20);
+            teste += jogadorTeste.ArvoreSkills.Cura();
             Console.WriteLine("O teste do jogador {0} resultou em {1} contra {2} do mestre",
                 jogadorTeste.Nome, teste, result
                 );
             if(teste >= result)
             {
                 Console.WriteLine("{0} passou no teste!", jogadorTeste.Nome);
-                var cura = Dados.RodarDado(jogadorTeste.Nome,1,4);
+                var cura = 0;
+                if (item == null)
+                {
+                    cura = Dados.RodarDado(jogadorTeste.Nome, 1, 4);
+                }
+                else
+                {
+                    cura = Dados.RodarDado(jogadorTeste.Nome, item.QtdDadosCura, 4);
+                }
+                
                 alvo.Vitalidade += cura;
                 if(alvo.Vitalidade > alvo.VidaMaxima)
                 {
@@ -301,6 +335,67 @@ namespace RPGProjConsole.service
             else
             {
                 Console.WriteLine("{0} falhou no teste", jogadorTeste.Nome);
+            }
+        }
+        public void AdicionarPericias(Jogador jogador)
+        {
+            var x = jogador.Modifier(4);
+            var qtd = ((2 + x) * 2) + x;
+            Console.WriteLine("{0} pode distribuir {1} quantidade de perícias",
+                jogador.Nome,
+                qtd);
+            Console.ReadLine();
+            bool escolhendoPericias = true;
+            var pericias = _context.Pericias.ToList();
+            while (escolhendoPericias)
+            {
+                var list = new List<JogadorPericia>();
+                Console.WriteLine("Escolha a perícia e a quantidade");
+                for(int i = 0; i < pericias.Count; i++)
+                {
+                    Console.WriteLine("{0} - {1}", i + 1, pericias[i].Descricao);
+                }
+                while(qtd != 0)
+                {
+                    Console.WriteLine("Perícia");
+                    var pericia = DigitarValor();
+                    Console.WriteLine("Quantidade");
+                    var quantidadeEscolhida = DigitarValor();
+                    var periciaQtd = new JogadorPericia()
+                    {
+                        Pericia = pericias[pericia - 1],
+                        Quantidade = quantidadeEscolhida
+                    };
+                    list.Add(periciaQtd);
+                }
+                Console.WriteLine("Deseja confirmar 1 - sim 2 não");
+                foreach(var item in list)
+                {
+                    Console.WriteLine("{0} pontos em {1}", item.Quantidade, item.Pericia.Descricao);
+                }
+                var resposta = DigitarValor();
+                if(resposta == 1)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i].Jogador = jogador;
+                        var objJogador = _context.JogadorPericia.FirstOrDefault(
+                            o => o.Pericia.Id == list[i].Pericia.Id);
+                        if(objJogador == null)
+                        {
+                            _context.JogadorPericia.Add(list[i]);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            objJogador.Quantidade += list[i].Quantidade;
+                            _partida._context.Entry(objJogador).State = EntityState.Modified;
+                            _partida._context.Update(objJogador);
+                            _partida._context.SaveChanges();
+                        }
+                    }
+                    escolhendoPericias = false;
+                }
             }
         }
     }

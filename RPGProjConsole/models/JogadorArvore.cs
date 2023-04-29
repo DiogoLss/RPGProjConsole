@@ -12,5 +12,6 @@ namespace RPGProjConsole.models
         public Jogador Jogador { get; set; }
         public ArvoreDeHabilidades ArvoreDeHabilidades { get; set; }
         public int QtdAdicional { get; set; }
+        public int EscolhaId { get; set; }
     }
 }

@@ -27,12 +27,11 @@ namespace RPGProjConsole.service
                 .Include(j => j.ArmaduraEquipada)
                 .ToList();
             IsPartidaOn = true;
-            Jogadores.Add( new Jogador { Nome = "Diogo" });
-            Jogadores.Add(new Jogador { Nome = "Roberto"});
             for (int i = 0; i < Jogadores.Count; i++)
             {
                 Jogadores[i].IsNpc = false;
                 Jogadores[i].InventarioObj = new InventarioConfig(Jogadores[i], _context);
+                Jogadores[i].ArvoreSkills = new ArvoreSkills(Jogadores[i], _context);
             }
             PericiaConfig = new PericiaConfig(_context, this);
         }
@@ -136,7 +135,7 @@ namespace RPGProjConsole.service
                         }
                         for (int i = 0; i < Jogadores.Count; i++)
                         {
-                            var nivel = new Nivel(Jogadores[i]);
+                            var nivel = new Nivel(Jogadores[i],_context);
                             nivel.TentarAumentarNivel();
                         }
                         Console.ReadLine();

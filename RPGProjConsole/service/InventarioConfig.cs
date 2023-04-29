@@ -90,10 +90,25 @@ namespace RPGProjConsole.service
                         Console.WriteLine("{0} - {1} com dano {2} que pesa {3} e custa {4}.",
                             i + 1, armas[i].Nome, armas[i].Dano, armas[i].Peso, armas[i].Preco);
                     }
-                    Console.WriteLine("Digite o index da arma escolhida, 0 para voltar");
+                    Console.WriteLine("Digite o index da arma escolhida, 0 para sair, improvisar ou criar arma");
                     var armaEscolhidaIndex = Digitar();
                     if (armaEscolhidaIndex == 0 || armaEscolhidaIndex > armas.Length)
                     {
+                        if(armaEscolhidaIndex == 0)
+                        {
+                            Console.WriteLine("0 - sair");
+                            Console.WriteLine("1 - improvisar");
+                            Console.WriteLine("2 - criar");
+                            var criarOuImprovisar = Digitar();
+                            if(criarOuImprovisar == 1)
+                            {
+                                Personagem.ArvoreSkills.ImprovisarArma();
+                            }
+                            else if(criarOuImprovisar == 2)
+                            {
+
+                            }
+                        }
                         estaEscolhendo = false;
                     }
                     else

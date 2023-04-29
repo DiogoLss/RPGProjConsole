@@ -8,5 +8,7 @@ namespace RPGProjConsole.models
 {
     class ItemGeneral : Item
     {
+        public bool ECura { get; set; }
+        public int QtdDadosCura { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using RPGProjConsole.models;
+﻿using Microsoft.EntityFrameworkCore;
+using RPGProjConsole.context;
+using RPGProjConsole.models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +11,12 @@ namespace RPGProjConsole.service
 {
     class Nivel
     {
-        public Personagem Personagem { get; set; }
-        public Nivel(Personagem personagem)
+        public Jogador Personagem { get; set; }
+        public readonly RPGContext _context;
+        public Nivel(Jogador personagem, RPGContext context)
         {
             Personagem = personagem;
+            _context = context;
         }
         
 
@@ -150,8 +154,83 @@ namespace RPGProjConsole.service
                 Console.WriteLine("{0} upou para o nível {1}!",
                     Personagem.Nome, Personagem.Nivel);
                 Console.ReadLine();
+                AdicionarPericias(Personagem);
+                Personagem.ArvoreSkills.AdicionarArvore();
             }
         }
-
+        public int DigitarValor()
+        {
+            int value;
+            bool ok = int.TryParse(Console.ReadLine(), out value);
+            if (ok)
+            {
+                return value;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        public void AdicionarPericias(Jogador jogador)
+        {
+            var x = jogador.Modifier(4);
+            var qtd = ((2 + x) * 2) + x;
+            Console.WriteLine("{0} pode distribuir {1} quantidade de perícias",
+                jogador.Nome,
+                qtd);
+            Console.ReadLine();
+            bool escolhendoPericias = true;
+            var pericias = _context.Pericias.ToList();
+            while (escolhendoPericias)
+            {
+                var list = new List<JogadorPericia>();
+                Console.WriteLine("Escolha a perícia e a quantidade");
+                for (int i = 0; i < pericias.Count; i++)
+                {
+                    Console.WriteLine("{0} - {1}", i + 1, pericias[i].Descricao);
+                }
+                while (qtd != 0)
+                {
+                    Console.WriteLine("Perícia");
+                    var pericia = DigitarValor();
+                    Console.WriteLine("Quantidade");
+                    var quantidadeEscolhida = DigitarValor();
+                    var periciaQtd = new JogadorPericia()
+                    {
+                        Pericia = pericias[pericia - 1],
+                        Quantidade = quantidadeEscolhida
+                    };
+                    list.Add(periciaQtd);
+                }
+                Console.WriteLine("Deseja confirmar 1 - sim 2 não");
+                foreach (var item in list)
+                {
+                    Console.WriteLine("{0} pontos em {1}", item.Quantidade, item.Pericia.Descricao);
+                }
+                var resposta = DigitarValor();
+                if (resposta == 1)
+                {
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        list[i].Jogador = jogador;
+                        var objJogador = _context.JogadorPericia.FirstOrDefault(
+                            o => o.Pericia.Id == list[i].Pericia.Id);
+                        if (objJogador == null)
+                        {
+                            _context.JogadorPericia.Add(list[i]);
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            objJogador.Quantidade += list[i].Quantidade;
+                            _context.Entry(objJogador).State = EntityState.Modified;
+                            _context.Update(objJogador);
+                            _context.SaveChanges();
+                        }
+                    }
+                    escolhendoPericias = false;
+                }
+            }
+        }
     }
 }

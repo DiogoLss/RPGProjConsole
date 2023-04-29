@@ -13,5 +13,6 @@ namespace RPGProjConsole.models
         public int Arvore { get; set; }
         public bool IsActive { get; set; }
         public int AdicionalMaximo { get; set; }
+        public int NecessarioTer { get; set; }
     }
 }
